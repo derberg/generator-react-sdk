@@ -2,21 +2,25 @@ import React from "react";
 
 import { render } from "./renderer";
 import { isJsFile } from "../utils";
-import { TemplateContext, TemplateRenderResult } from "../types";
+import { TemplateContext, TemplateFunction, TemplateRenderResult } from "../types";
 
 /**
  * render a file with react. This function automatically transforms jsx to js before importing the component.
  * 
  * @param filepath the path to file to render
  */
-export async function renderTemplate(filepath: string, context: TemplateContext): Promise<TemplateRenderResult | undefined> {
+export async function renderTemplate(filepath: string, context: TemplateContext): Promise<TemplateRenderResult[] | TemplateRenderResult | undefined> {
   if (!isJsFile(filepath)) {
     return undefined;
   }
 
   let data = undefined;
   try {
-    data = await importComponent(filepath, context);
+    const component = await importComponent(filepath);
+    if (component === undefined) {
+      return undefined;
+    }
+    data = await component(context);
   } catch(err) {
     throw err;
   }
@@ -24,6 +28,10 @@ export async function renderTemplate(filepath: string, context: TemplateContext)
   // undefined, null etc. cases
   if (!data) {
     return undefined;
+  }
+
+  if (Array.isArray(data)) {
+    return data.map(file => file && renderFile(file)).filter(Boolean);
   }
   return renderFile(data);
 }
@@ -34,7 +42,7 @@ export async function renderTemplate(filepath: string, context: TemplateContext)
  * @private
  * @param filepath to import
  */
-function importComponent(filepath: string, context: TemplateContext): Promise<React.ReactElement | undefined> {
+function importComponent(filepath: string): Promise<TemplateFunction | undefined> {
   return new Promise((resolve, reject) => {
     try {
       // we should import component only in NodeJS
@@ -43,8 +51,8 @@ function importComponent(filepath: string, context: TemplateContext): Promise<Re
       delete require.cache[require.resolve(filepath)];
 
       const component = require(filepath);
-      if (typeof component === "function") resolve(component(context));
-      if (typeof component.default === "function") resolve(component.default(context));
+      if (typeof component === "function") resolve(component);
+      if (typeof component.default === "function") resolve(component.default);
       resolve(undefined);
     } catch(err) {
       reject(err);

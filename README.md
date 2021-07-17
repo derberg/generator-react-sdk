@@ -18,7 +18,8 @@ AsyncAPI React SDK is a set of components/functions to use React as render engin
 - [How it works](#how-it-works)
   * [The Transpile Process](#the-transpile-process)
   * [The Rendering Process](#the-rendering-process)
-  * [The debug flag](#the-debug-flag)
+    + [Requirements](#requirements)
+- [The debug flag](#the-debug-flag)
 - [Example](#example)
 - [Resources](#resources)
 - [Development](#development)
@@ -52,7 +53,13 @@ Restrictions:
 - HTML tags at the moment is not supported.
 - React internal components like Fragments, Suspense etc. are skipped.
 
-### The debug flag
+#### Requirements
+
+To render the transpiled template SDK requires:
+
+* Node.js v12.16 and higher
+
+## The debug flag
 
 When rendering you have the option of passing a `debug` flag which does not remove the transpiled files after the rendering process is done.
 

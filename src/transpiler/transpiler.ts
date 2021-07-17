@@ -27,16 +27,18 @@ export async function transpileFiles(directory: string, outputDir: string, optio
          */
         const bundles = await rollup({
             input: files,
-            onwarn: ()=>{},
+            onwarn: () => {},
             plugins: [
                 babel({
                     cwd: ROOT_DIR,
                     babelHelpers: "bundled",
                     plugins: [
-                        "source-map-support"
+                        "source-map-support",
                     ],
                     presets: [
-                        "@babel/preset-env",
+                        ["@babel/preset-env", {
+                            targets: { node: "12.16" },
+                        }],
                         ["@babel/preset-react", {
                             runtime: "automatic",
                         }],
@@ -48,7 +50,10 @@ export async function transpileFiles(directory: string, outputDir: string, optio
             format: "commonjs",
             sourcemap: true,
             dir: outputDir,
-            exports: "auto"
+            exports: "auto",
+            paths: {
+              'react/jsx-runtime': 'react/cjs/react-jsx-runtime.production.min',
+            }
         })
     }
 
